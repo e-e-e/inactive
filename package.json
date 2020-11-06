@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "build:example:simple": "parcel --out-dir dist/examples examples/simple/index.html",
+    "build:example:composed": "parcel --out-dir dist/examples examples/composed/index.html",
+    "test": "jest",
+    "test:watch": "jest --watchAll"
+  },
   "dependencies": {
     "tsc": "^1.20150623.0",
     "typescript": "^4.0.5"
@@ -14,6 +21,7 @@
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-prettier": "^3.1.4",
+    "parcel-bundler": "^1.12.4",
     "prettier": "^2.1.2"
   }
 }

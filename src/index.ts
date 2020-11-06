@@ -1,24 +1,55 @@
-const Reactless = {
-  createElement: <
-    T extends keyof JSX.IntrinsicElements,
-    K extends keyof JSX.IntrinsicElements[T]
-  >(
-    type: T,
-    props?: JSX.IntrinsicElements[T],
-    ...children: JSX.Children[]
-  ): JSX.ReactlessChildElements[T] | null => {
-    const element = document.createElement(type);
-    if (props) {
-      Object.keys(props).forEach((key: string) => {
-        console.log(element[key as K]);
-        element[key as K] = props[key as K] as any;
-      });
-    }
-    children.forEach((child) => {
-      child && element.append(child);
+type ReactlessProps = Record<string, any>;
+type ReactlessComponent = (props: ReactlessProps) => JSX.Child;
+
+function isReactlessComponent<T extends keyof JSX.IntrinsicElements>(
+  type: T | ReactlessComponent
+): type is ReactlessComponent {
+  return !(typeof type === 'string');
+}
+
+function createElement(
+  type: ReactlessComponent,
+  props?: ReactlessProps,
+  ...children: JSX.Children[]
+): JSX.Child;
+function createElement<
+  T extends keyof JSX.IntrinsicElements,
+  K extends keyof JSX.IntrinsicElements[T]
+>(
+  type: T | ReactlessComponent,
+  props?: JSX.IntrinsicElements[T],
+  ...children: JSX.Children[]
+): HTMLElementTagNameMap[T];
+function createElement<
+  T extends keyof JSX.IntrinsicElements,
+  K extends keyof JSX.IntrinsicElements[T]
+>(
+  type: T | ReactlessComponent,
+  props?: JSX.IntrinsicElements[T],
+  ...children: JSX.Children[]
+): HTMLElementTagNameMap[T] | JSX.Child {
+  if (isReactlessComponent(type)) {
+    return type(props as ReactlessProps);
+  }
+  const element = document.createElement(type);
+  if (props) {
+    Object.keys(props).forEach((key: string) => {
+      console.log(element[key as K]);
+      element[key as K] = props[key as K] as any;
     });
-    return element;
-  },
+  }
+  children.forEach((child) => {
+    if (Array.isArray(child)) {
+      child.forEach((c) => c && element.append(c));
+    } else {
+      child && element.append(child);
+    }
+  });
+  return element;
+}
+
+const Reactless = {
+  createElement,
 };
 
 type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
@@ -49,10 +80,11 @@ type OptionalValues<T> = {
 
 declare global {
   namespace JSX {
-    export type Children =
+    export type Child =
       | HTMLElementTagNameMap[keyof HTMLElementTagNameMap]
       | string
       | null;
+    export type Children = Child | Child[];
     export type ReactlessChildElements = HTMLElementTagNameMap;
     export type IntrinsicElements = OptionalValues<HTMLElementTagNameMap>;
   }
