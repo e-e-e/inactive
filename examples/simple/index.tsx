@@ -15,7 +15,9 @@ const App = () => {
           backgroundColor: 'green',
         }}
       >
-        <p>Block</p>
+        <p>
+          Block <button onClick={() => console.log('ok')}>'Hello'</button>
+        </p>
       </div>
       <p>This is the simplest example.</p>
     </div>

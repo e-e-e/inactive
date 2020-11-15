@@ -1,4 +1,5 @@
 import * as CSS from 'csstype';
+import { ReactlessEventHandlers } from './events';
 
 type ReactlessProps = Record<string, any>;
 type ReactlessComponent = (props: ReactlessProps) => JSX.Child;
@@ -28,16 +29,16 @@ function createElement(
   ...children: JSX.Children[]
 ): JSX.Child;
 function createElement<
-  T extends keyof JSX.DefaultIntrinsicElementMap,
-  K extends keyof JSX.DefaultIntrinsicElementMap[T]
+  T extends keyof JSX.IntrinsicElements,
+  K extends keyof JSX.IntrinsicElements[T]
 >(
   type: T | ReactlessComponent,
   props?: JSX.IntrinsicElements[T],
   ...children: JSX.Children[]
 ): HTMLElementTagNameMap[T];
 function createElement<
-  T extends keyof JSX.DefaultIntrinsicElementMap,
-  K extends keyof JSX.DefaultIntrinsicElementMap[T]
+  T extends keyof JSX.IntrinsicElements,
+  K extends keyof JSX.IntrinsicElements[T]
 >(
   type: T | ReactlessComponent,
   props?: JSX.IntrinsicElements[T],
@@ -69,12 +70,13 @@ function setProp(element: Element, key: string, value: any) {
     }
     value(element);
   } else if (key === 'style') {
-    //set style
     const style = getStyleText(value);
     console.log('setstyle', style);
     element.setAttribute('style', style);
   } else if (key === 'className') {
     element.setAttribute('class', value);
+  } else if (key.startsWith('on')) {
+    (element as any)[key.toLowerCase()] = value;
   } else if (key in element) {
     (element as any)[key] = value;
   } else {
@@ -107,7 +109,7 @@ type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
 
 type MethodKeys<T> = {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  [P in keyof T]: T[P] extends Function ? P : never;
+  [P in keyof T]: T[P] extends Function | null ? P : never;
 }[keyof T];
 
 type ReadonlyKeys<T> = {
@@ -125,8 +127,14 @@ type KeepStyles<T> = T extends ElementCSSInlineStyle
 
 type OmitReadonlyAndMethods<T> = Omit<T, ReadonlyKeys<T> | MethodKeys<T>>;
 
+type ReactlessElementProps = {
+  ref: ReactlessRef;
+} & ReactlessEventHandlers;
+
 type OptionalValues<T> = {
-  [K in keyof T]: Partial<OmitReadonlyAndMethods<KeepStyles<T[K]>>>;
+  [K in keyof T]: Partial<
+    OmitReadonlyAndMethods<KeepStyles<T[K]>> & ReactlessElementProps
+  >;
 };
 
 type ReactlessRef = <T extends Element>(element: T) => void;
@@ -143,9 +151,7 @@ declare global {
     export type DefaultIntrinsicElementMap = OptionalValues<
       HTMLElementTagNameMap
     >;
-    export type IntrinsicElements = DefaultIntrinsicElementMap & {
-      ref: ReactlessRef;
-    };
+    export type IntrinsicElements = OptionalValues<HTMLElementTagNameMap>;
   }
 }
 
