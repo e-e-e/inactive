@@ -18,4 +18,4 @@ const App = () => {
   );
 };
 
-document.body.append(App());
+Reactless.mount(document.body, <App />);
