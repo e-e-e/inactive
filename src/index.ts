@@ -85,7 +85,6 @@ function setProp(element: Element, key: string, value: any) {
     value.current = element;
   } else if (key === 'style') {
     const style = getStyleText(value);
-    console.log('setstyle', style);
     element.setAttribute('style', style);
   } else if (key === 'className') {
     element.setAttribute('class', value);
