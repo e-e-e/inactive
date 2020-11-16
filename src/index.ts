@@ -4,6 +4,8 @@ import { ReactlessEventHandlers } from './events';
 type ReactlessProps = Record<string, any>;
 type ReactlessComponent = (props: ReactlessProps) => JSX.Child;
 
+const refMap = new WeakMap<Node, ReactlessRef>();
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 function isFunction(value: any): value is Function {
   return typeof value === 'function';
@@ -15,11 +17,25 @@ function isReactlessComponent<T extends keyof JSX.IntrinsicElements>(
   return isFunction(type);
 }
 
+const callback: MutationCallback = function (mutationsList) {
+  for (const mutation of mutationsList) {
+    if (mutation.type === 'childList') {
+      mutation.removedNodes.forEach((node) => {
+        const ref = refMap.get(node);
+        refMap.delete(node);
+        if (ref) ref.current = null;
+      });
+    }
+  }
+};
+
 function mount(root: Element, element: JSX.Child): Node | null {
   if (!element) return null;
   if (typeof element === 'string') {
     return root.appendChild(document.createTextNode(element));
   }
+  const observer = new MutationObserver(callback);
+  observer.observe(root, { childList: true, subtree: true });
   return root.appendChild(element);
 }
 
@@ -65,10 +81,8 @@ function createElement<
 
 function setProp(element: Element, key: string, value: any) {
   if (key === 'ref') {
-    if (!isFunction(value)) {
-      throw Error('Expect ref to be a function');
-    }
-    value(element);
+    refMap.set(element, value);
+    value.current = element;
   } else if (key === 'style') {
     const style = getStyleText(value);
     console.log('setstyle', style);
@@ -137,7 +151,9 @@ type OptionalValues<T> = {
   >;
 };
 
-type ReactlessRef = <T extends Element>(element: T) => void;
+type ReactlessRef<T extends Element = Element> = {
+  current: T | null;
+};
 
 declare global {
   namespace JSX {
@@ -155,9 +171,14 @@ declare global {
   }
 }
 
+function createRef(): ReactlessRef {
+  return { current: null };
+}
+
 const Reactless = {
   createElement,
   mount,
+  createRef,
 };
 
 export default Reactless;
