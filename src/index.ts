@@ -1,8 +1,8 @@
 import * as CSS from 'csstype';
 import { ReactlessEventHandlers } from './events';
 
-type ReactlessProps = Record<string, any>;
-type ReactlessComponent = (props: ReactlessProps) => JSX.Child;
+type ReactlessProps = Record<string, any> & { children?: JSX.Children };
+type ReactlessComponent = (props: ReactlessProps) => JSX.Element;
 
 const refMap = new WeakMap<Node, ReactlessRef>();
 
@@ -42,7 +42,7 @@ function mount(root: Element, element: JSX.Child): Node | null {
 function createElement(
   type: ReactlessComponent,
   props?: ReactlessProps,
-  ...children: JSX.Children[]
+  ...children: JSX.Child[]
 ): JSX.Child;
 function createElement<
   T extends keyof JSX.IntrinsicElements,
@@ -61,7 +61,7 @@ function createElement<
   ...children: JSX.Children[]
 ): HTMLElementTagNameMap[T] | JSX.Child {
   if (isReactlessComponent(type)) {
-    return type(props as ReactlessProps);
+    return type({ ...props, children } as ReactlessProps);
   }
   const element = document.createElement(type);
   if (props) {
@@ -156,12 +156,11 @@ type ReactlessRef<T extends Element = Element> = {
 
 declare global {
   namespace JSX {
-    export type Child =
+    export type Element =
       | HTMLElementTagNameMap[keyof HTMLElementTagNameMap]
-      | string
       | null;
+    export type Child = Element | string;
     export type Children = Child | Child[];
-    export type Element = Child;
     export type ReactlessChildElements = HTMLElementTagNameMap;
     export type DefaultIntrinsicElementMap = OptionalValues<
       HTMLElementTagNameMap
