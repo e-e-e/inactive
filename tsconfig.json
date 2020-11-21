@@ -17,8 +17,8 @@
       "dom"
     ],
     "jsx": "react",
-    "jsxFactory": "Reactless.createElement",
-    "jsxFragmentFactory": "Reactless.Fragment",
+    "jsxFactory": "Inactive.createElement",
+    "jsxFragmentFactory": "Inactive.Fragment",
     "outDir": "./dist/",
     "rootDir": "./src/",
     "strict": true,

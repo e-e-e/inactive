@@ -1,10 +1,10 @@
 import * as CSS from 'csstype';
-import { ReactlessEventHandlers } from './events';
+import { InactiveEventHandlers } from './events';
 
-type ReactlessProps = Record<string, any> & { children?: JSX.Children };
-type ReactlessComponent = (props: ReactlessProps) => JSX.Element;
+type InactiveProps = Record<string, any> & { children?: JSX.Children };
+type InactiveComponent = (props: InactiveProps) => JSX.Element;
 
-const refMap = new WeakMap<Node, ReactlessRef>();
+const refMap = new WeakMap<Node, InactiveRef>();
 const onEnterMap = new WeakMap<Node, (ref: Element) => void>();
 const onExitMap = new WeakMap<Node, () => void>();
 
@@ -13,9 +13,9 @@ function isFunction(value: any): value is Function {
   return typeof value === 'function';
 }
 
-function isReactlessComponent<T extends keyof JSX.IntrinsicElements>(
-  type: T | ReactlessComponent
-): type is ReactlessComponent {
+function isInactiveComponent<T extends keyof JSX.IntrinsicElements>(
+  type: T | InactiveComponent
+): type is InactiveComponent {
   return isFunction(type);
 }
 
@@ -66,15 +66,15 @@ function mount(root: Element, element: JSX.Child): Node | null {
 }
 
 function createElement(
-  type: ReactlessComponent,
-  props?: ReactlessProps,
+  type: InactiveComponent,
+  props?: InactiveProps,
   ...children: JSX.Child[]
 ): JSX.Child;
 function createElement<
   T extends keyof JSX.IntrinsicElements,
   K extends keyof JSX.IntrinsicElements[T]
 >(
-  type: T | ReactlessComponent,
+  type: T | InactiveComponent,
   props?: JSX.IntrinsicElements[T],
   ...children: JSX.Child[]
 ): HTMLElementTagNameMap[T];
@@ -82,12 +82,12 @@ function createElement<
   T extends keyof JSX.IntrinsicElements,
   K extends keyof JSX.IntrinsicElements[T]
 >(
-  type: T | ReactlessComponent,
+  type: T | InactiveComponent,
   props?: JSX.IntrinsicElements[T],
   ...children: JSX.Child[]
 ): HTMLElementTagNameMap[T] | JSX.Child {
-  if (isReactlessComponent(type)) {
-    return type({ ...props, children } as ReactlessProps);
+  if (isInactiveComponent(type)) {
+    return type({ ...props, children } as InactiveProps);
   }
   const element = document.createElement(type);
   if (props) {
@@ -180,20 +180,20 @@ type KeepStyles<T> = T extends ElementCSSInlineStyle
 
 type OmitReadonlyAndMethods<T> = Omit<T, ReadonlyKeys<T> | MethodKeys<T>>;
 
-type ReactlessElementProps = {
-  ref: ReactlessRef;
+type InactiveElementProps = {
+  ref: InactiveRef;
   onEnter: (ref: Element) => void;
   onExit: () => void;
   children: any;
-} & ReactlessEventHandlers;
+} & InactiveEventHandlers;
 
 type OptionalValues<T> = {
   [K in keyof T]: Partial<
-    OmitReadonlyAndMethods<KeepStyles<T[K]>> & ReactlessElementProps
+    OmitReadonlyAndMethods<KeepStyles<T[K]>> & InactiveElementProps
   >;
 };
 
-type ReactlessRef<T extends Element = Element> = {
+type InactiveRef<T extends Element = Element> = {
   current: T | null;
 };
 
@@ -208,7 +208,7 @@ declare global {
     interface ElementChildrenAttribute {
       children: Children;
     }
-    export type ReactlessChildElements = HTMLElementTagNameMap;
+    export type InactiveChildElements = HTMLElementTagNameMap;
     export type DefaultIntrinsicElementMap = OptionalValues<
       HTMLElementTagNameMap
     >;
@@ -216,7 +216,7 @@ declare global {
   }
 }
 
-function createRef<T extends Element>(): ReactlessRef<T> {
+function createRef<T extends Element>(): InactiveRef<T> {
   return { current: null };
 }
 
@@ -225,11 +225,9 @@ function Fragment({ children }: { children: JSX.Children }) {
   return [children];
 }
 
-const Reactless = {
+const Inactive = {
   createElement,
   mount,
   createRef,
   Fragment,
 };
-
-export default Reactless;

@@ -1,7 +1,7 @@
 /**
  * These types are copied directly from lib.dom.d.ts with simple case changes.
  */
-export interface ReactlessEventHandlers {
+export interface InactiveEventHandlers {
   /**
    * Fires when the user aborts the download.
    * @param ev The event.
