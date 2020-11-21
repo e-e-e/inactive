@@ -231,3 +231,5 @@ const Inactive = {
   createRef,
   Fragment,
 };
+
+export default Inactive;
