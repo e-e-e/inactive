@@ -1,16 +1,23 @@
 {
   "name": "reactless",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.0.1.alpha1",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "build:example:simple": "parcel --out-dir dist/examples examples/simple/index.html",
     "build:example:composed": "parcel --out-dir dist/examples examples/composed/index.html",
+    "build:example:fragments": "parcel --out-dir dist/examples examples/fragments/index.html",
     "build:example:events": "parcel --out-dir dist/examples examples/events/index.html",
     "test": "jest",
     "test:watch": "jest --watchAll"
   },
+  "files": [
+    "src",
+    "lib"
+  ],
   "dependencies": {
     "csstype": "^3.0.5",
     "tsc": "^1.20150623.0",

@@ -5,6 +5,8 @@ type ReactlessProps = Record<string, any> & { children?: JSX.Children };
 type ReactlessComponent = (props: ReactlessProps) => JSX.Element;
 
 const refMap = new WeakMap<Node, ReactlessRef>();
+const onEnterMap = new WeakMap<Node, (ref: Element) => void>();
+const onExitMap = new WeakMap<Node, () => void>();
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 function isFunction(value: any): value is Function {
@@ -17,13 +19,37 @@ function isReactlessComponent<T extends keyof JSX.IntrinsicElements>(
   return isFunction(type);
 }
 
+function isElement(node: Node): node is Element {
+  return node.nodeType === 1;
+}
+
+function walkDom(node: Node, fn: (el: Element) => void): void {
+  if (isElement(node)) {
+    fn(node);
+    node.childNodes.forEach((child) => walkDom(child, fn));
+  }
+}
+
+function maybeCallOnEnterHandler(element: Element) {
+  const handler = onEnterMap.get(element);
+  handler && setTimeout(() => handler(element), 0);
+}
+function maybeCallOnExitHandler(element: Element) {
+  const handler = onExitMap.get(element);
+  handler && setTimeout(handler, 0);
+}
+
 const callback: MutationCallback = function (mutationsList) {
   for (const mutation of mutationsList) {
     if (mutation.type === 'childList') {
+      mutation.addedNodes.forEach((node) => {
+        walkDom(node, maybeCallOnEnterHandler);
+      });
       mutation.removedNodes.forEach((node) => {
         const ref = refMap.get(node);
         refMap.delete(node);
         if (ref) ref.current = null;
+        walkDom(node, maybeCallOnExitHandler);
       });
     }
   }
@@ -50,7 +76,7 @@ function createElement<
 >(
   type: T | ReactlessComponent,
   props?: JSX.IntrinsicElements[T],
-  ...children: JSX.Children[]
+  ...children: JSX.Child[]
 ): HTMLElementTagNameMap[T];
 function createElement<
   T extends keyof JSX.IntrinsicElements,
@@ -58,7 +84,7 @@ function createElement<
 >(
   type: T | ReactlessComponent,
   props?: JSX.IntrinsicElements[T],
-  ...children: JSX.Children[]
+  ...children: JSX.Child[]
 ): HTMLElementTagNameMap[T] | JSX.Child {
   if (isReactlessComponent(type)) {
     return type({ ...props, children } as ReactlessProps);
@@ -69,13 +95,7 @@ function createElement<
       setProp(element, key, props[key as K]);
     });
   }
-  children.forEach((child) => {
-    if (Array.isArray(child)) {
-      child.forEach((c) => c && element.append(c));
-    } else {
-      child && element.append(child);
-    }
-  });
+  element.append(...children.flatMap(render));
   return element;
 }
 
@@ -83,6 +103,10 @@ function setProp(element: Element, key: string, value: any) {
   if (key === 'ref') {
     refMap.set(element, value);
     value.current = element;
+  } else if (key === 'onExit') {
+    onExitMap.set(element, value);
+  } else if (key === 'onEnter') {
+    onEnterMap.set(element, value);
   } else if (key === 'style') {
     const style = getStyleText(value);
     element.setAttribute('style', style);
@@ -95,6 +119,22 @@ function setProp(element: Element, key: string, value: any) {
   } else {
     element.setAttribute(key, value);
   }
+}
+
+function render(child: JSX.Children): Node | Node[] {
+  if (Array.isArray(child)) {
+    return child.flatMap(render);
+  }
+  if (typeof child === 'string' || typeof child === 'number') {
+    return document.createTextNode(child.toString());
+  }
+  if (!child) {
+    return document.createTextNode('');
+  }
+  if (child instanceof Node) {
+    return child;
+  }
+  throw Error(child + ' is not a valid element');
 }
 
 function getStyleText(styles: CSS.Properties<string | number>): string {
@@ -142,6 +182,9 @@ type OmitReadonlyAndMethods<T> = Omit<T, ReadonlyKeys<T> | MethodKeys<T>>;
 
 type ReactlessElementProps = {
   ref: ReactlessRef;
+  onEnter: (ref: Element) => void;
+  onExit: () => void;
+  children: any;
 } & ReactlessEventHandlers;
 
 type OptionalValues<T> = {
@@ -158,9 +201,13 @@ declare global {
   namespace JSX {
     export type Element =
       | HTMLElementTagNameMap[keyof HTMLElementTagNameMap]
+      | string
       | null;
-    export type Child = Element | string;
+    export type Child = Element;
     export type Children = Child | Child[];
+    interface ElementChildrenAttribute {
+      children: Children;
+    }
     export type ReactlessChildElements = HTMLElementTagNameMap;
     export type DefaultIntrinsicElementMap = OptionalValues<
       HTMLElementTagNameMap
@@ -169,14 +216,20 @@ declare global {
   }
 }
 
-function createRef(): ReactlessRef {
+function createRef<T extends Element>(): ReactlessRef<T> {
   return { current: null };
+}
+
+function Fragment({ children }: { children: JSX.Children }) {
+  if (Array.isArray(children)) return children.map(render);
+  return [children];
 }
 
 const Reactless = {
   createElement,
   mount,
   createRef,
+  Fragment,
 };
 
 export default Reactless;
