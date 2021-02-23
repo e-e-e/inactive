@@ -1,6 +1,6 @@
 {
   "name": "inactive",
-  "version": "0.0.1-alpha.3",
+  "version": "0.0.1-alpha.4",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "typings": "lib/esm/index.d.ts",
@@ -19,10 +19,10 @@
     "lib"
   ],
   "dependencies": {
-    "csstype": "^3.0.5",
-    "typescript": "^4.0.5"
+    "csstype": "^3.0.5"
   },
   "devDependencies": {
+    "typescript": "^4.0.5",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.12.1",
