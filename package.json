@@ -1,13 +1,13 @@
 {
   "name": "inactive",
   "version": "0.0.1-alpha.3",
-  "main": "lib/index.js",
-  "module": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "lib/cjs/index.js",
+  "module": "lib/esm/index.js",
+  "typings": "lib/esm/index.d.ts",
   "license": "MIT",
   "scripts": {
     "prepublish": "yarn build",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
     "build:example:simple": "parcel --out-dir dist/examples examples/simple/index.html",
     "build:example:composed": "parcel --out-dir dist/examples examples/composed/index.html",
     "build:example:fragments": "parcel --out-dir dist/examples examples/fragments/index.html",
@@ -16,7 +16,6 @@
     "test:watch": "jest --watchAll"
   },
   "files": [
-    "src",
     "lib"
   ],
   "dependencies": {

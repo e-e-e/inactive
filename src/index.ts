@@ -57,8 +57,8 @@ const callback: MutationCallback = function (mutationsList) {
 
 function mount(root: Element, element: JSX.Child): Node | null {
   if (!element) return null;
-  if (typeof element === 'string') {
-    return root.appendChild(document.createTextNode(element));
+  if (typeof element === 'string' || typeof element === 'number') {
+    return root.appendChild(document.createTextNode(element.toString()));
   }
   const observer = new MutationObserver(callback);
   observer.observe(root, { childList: true, subtree: true });
@@ -70,10 +70,7 @@ function createElement(
   props?: InactiveProps,
   ...children: JSX.Child[]
 ): JSX.Child;
-function createElement<
-  T extends keyof JSX.IntrinsicElements,
-  K extends keyof JSX.IntrinsicElements[T]
->(
+function createElement<T extends keyof JSX.IntrinsicElements>(
   type: T | InactiveComponent,
   props?: JSX.IntrinsicElements[T],
   ...children: JSX.Child[]
@@ -142,7 +139,7 @@ function getStyleText(styles: CSS.Properties<string | number>): string {
     const value = styles[key as keyof CSS.Properties];
     return value == null
       ? acc
-      : `${acc} ${toKababCase(key)}: ${valueToUnitString(key, value)};`;
+      : `${acc} ${toKebabCase(key)}: ${valueToUnitString(key, value)};`;
   }, '');
 }
 
@@ -150,7 +147,7 @@ function valueToUnitString(key: string, value: string | number) {
   return value && typeof value === 'number' ? `${value}px` : value;
 }
 
-function toKababCase(str: string): string {
+function toKebabCase(str: string): string {
   return str.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
@@ -201,9 +198,9 @@ declare global {
   namespace JSX {
     export type Element =
       | HTMLElementTagNameMap[keyof HTMLElementTagNameMap]
-      | string
+      | Text
       | null;
-    export type Child = Element;
+    export type Child = Element | number | string;
     export type Children = Child | Child[];
     interface ElementChildrenAttribute {
       children: Children;

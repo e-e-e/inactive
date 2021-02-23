@@ -1,6 +1,6 @@
 {
   "include": [
-    "src"
+    "src/index.ts"
   ],
   "exclude": [
     "node_modules",
@@ -8,9 +8,9 @@
     "lib"
   ],
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "target": "es2015",
+    "module": "es2020",
+    "moduleResolution": "Node",
     "downlevelIteration": true,
     "lib": [
       "esnext",

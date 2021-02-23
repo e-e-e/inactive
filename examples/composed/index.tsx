@@ -1,4 +1,4 @@
-import Reactless from '../../src';
+import Inactive from '../../src';
 
 const Item = ({ name }: { name: string }) => {
   return <li>{name}</li>;
@@ -18,4 +18,4 @@ const App = () => {
   );
 };
 
-Reactless.mount(document.body, <App />);
+Inactive.mount(document.body, <App />);

@@ -1,4 +1,4 @@
-import Reactless from '../../src';
+import Inactive from '../../src';
 
 const App = () => {
   return (
@@ -9,4 +9,4 @@ const App = () => {
   );
 };
 
-Reactless.mount(document.body, <App />);
+Inactive.mount(document.body, <App />);

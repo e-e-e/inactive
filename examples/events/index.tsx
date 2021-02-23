@@ -1,18 +1,18 @@
-import Reactless from '../../src';
+import Inactive from '../../src';
 
 const Item = ({ children }: { children?: JSX.Children }) => {
   return <li>{children}</li>;
 };
 
 const App = () => {
-  const ref = Reactless.createRef();
+  const ref = Inactive.createRef();
   let count = 0;
   return (
     <div>
       <button
         onClick={() => {
           const item = <Item>Item {count++}</Item>;
-          item && ref.current?.appendChild(item);
+          item && ref.current?.append(item);
         }}
       >
         Add
@@ -30,4 +30,4 @@ const App = () => {
   );
 };
 
-Reactless.mount(document.body, <App />);
+Inactive.mount(document.body, <App />);
