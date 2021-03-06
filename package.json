@@ -16,7 +16,8 @@
     "test:watch": "jest --watchAll"
   },
   "files": [
-    "lib"
+    "lib",
+    "src"
   ],
   "dependencies": {
     "csstype": "^3.0.5"

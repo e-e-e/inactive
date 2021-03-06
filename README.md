@@ -4,5 +4,5 @@ Have you ever just wanted a simple way to generate HTML content easily in Javasc
 without all the weight of a virtual dom and a reactive state management? 
  
 Well, this is where _Inactive_ comes in. Its compiles JSX to DOM Elements, which
-can then be directly attached directly to the DOM. There is no state management system, 
+can then be directly attached to the DOM. There is no state management system, 
 Virtual DOM or anything fancy, so that part is up to you.

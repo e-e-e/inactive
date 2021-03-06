@@ -92,7 +92,12 @@ function createElement<
       setProp(element, key, props[key as K]);
     });
   }
-  element.append(...children.flatMap(render));
+  const renderedChildren = children.flatMap(render);
+  if (element instanceof HTMLTemplateElement) {
+    element.content.append(...renderedChildren);
+  } else {
+    element.append(...renderedChildren);
+  }
   return element;
 }
 
